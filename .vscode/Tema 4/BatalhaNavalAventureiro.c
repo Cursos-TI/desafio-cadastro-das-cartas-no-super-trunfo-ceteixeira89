@@ -20,8 +20,8 @@ int main() {
     // 2. Coordenadas iniciais e validação de 4 navios
     // ============================
 
-    // Navio 1: Horizontal — começa em (linha 2, coluna 1)
-    int linha_h1 = 2, coluna_h1 = 1;
+    // Navio 1: Horizontal — começa em (linha 3, coluna 1)
+    int linha_h1 = 3, coluna_h1 = 1;
     if (coluna_h1 + TAM_NAVIO <= TAM) {
         for (int i = 0; i < TAM_NAVIO; i++) {
             tabuleiro[linha_h1][coluna_h1 + i] = NAVIO;
