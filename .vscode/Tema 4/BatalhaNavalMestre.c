@@ -1,117 +1,124 @@
 #include <stdio.h>
-#include <stdlib.h>
 
 #define TAM 10
-#define TAM_HABIL 7
-#define ORIGEM 3  // Centro da matriz 7x7
 #define NAVIO 3
 #define AGUA 0
-#define HABIL 5
+#define TAM_NAVIO 3
 
-// Inicializa o tabuleiro com água
-void inicializarTabuleiro(int tabuleiro[TAM][TAM]) {
-    for (int i = 0; i < TAM; i++)
-        for (int j = 0; j < TAM; j++)
-            tabuleiro[i][j] = AGUA;
-}
-
-// Posiciona navios fixos
-void posicionarNavios(int tabuleiro[TAM][TAM]) {
-    // Horizontal
-    for (int i = 0; i < 3; i++)
-        tabuleiro[2][1 + i] = NAVIO;
-
-    // Vertical
-    for (int i = 0; i < 3; i++)
-        tabuleiro[5 + i][6] = NAVIO;
-
-    // Diagonal ↘
-    for (int i = 0; i < 3; i++)
-        tabuleiro[i][i] = NAVIO;
-
-    // Diagonal ↙
-    for (int i = 0; i < 3; i++)
-        tabuleiro[i][9 - i] = NAVIO;
-}
-
-// Gera matriz Cone (apontando para baixo)
-void gerarMatrizCone(int cone[TAM_HABIL][TAM_HABIL]) {
-    for (int i = 0; i < TAM_HABIL; i++) {
-        for (int j = 0; j < TAM_HABIL; j++) {
-            if (i >= ORIGEM && j >= ORIGEM - (i - ORIGEM) && j <= ORIGEM + (i - ORIGEM))
-                cone[i][j] = 1;
-            else
-                cone[i][j] = 0;
+int main() {
+    // ============================
+    // 1. Inicialização do tabuleiro base com água (0) e navios (3)
+    // ============================
+    int tabuleiro_num[TAM][TAM];
+    for (int linha = 0; linha < TAM; linha++) {
+        for (int coluna = 0; coluna < TAM; coluna++) {
+            tabuleiro_num[linha][coluna] = AGUA;
         }
     }
-}
 
-// Gera matriz Cruz
-void gerarMatrizCruz(int cruz[TAM_HABIL][TAM_HABIL]) {
-    for (int i = 0; i < TAM_HABIL; i++) {
-        for (int j = 0; j < TAM_HABIL; j++) {
-            cruz[i][j] = (i == ORIGEM || j == ORIGEM) ? 1 : 0;
+    // Navio 1: Horizontal — (linha 3, coluna 1)
+    int linha_h1 = 3, coluna_h1 = 1;
+    if (coluna_h1 + TAM_NAVIO <= TAM) {
+        for (int i = 0; i < TAM_NAVIO; i++) {
+            tabuleiro_num[linha_h1][coluna_h1 + i] = NAVIO;
         }
     }
-}
 
-// Gera matriz Octaedro (losango)
-void gerarMatrizOctaedro(int octaedro[TAM_HABIL][TAM_HABIL]) {
-    for (int i = 0; i < TAM_HABIL; i++) {
-        for (int j = 0; j < TAM_HABIL; j++) {
-            octaedro[i][j] = (abs(i - ORIGEM) + abs(j - ORIGEM) <= 3) ? 1 : 0;
+    // Navio 2: Vertical — (linha 5, coluna 6)
+    int linha_v1 = 5, coluna_v1 = 6;
+    if (linha_v1 + TAM_NAVIO <= TAM) {
+        for (int i = 0; i < TAM_NAVIO; i++) {
+            tabuleiro_num[linha_v1 + i][coluna_v1] = NAVIO;
         }
     }
-}
 
-// Aplica a matriz da habilidade ao tabuleiro no ponto de origem
-void aplicarHabilidade(int tabuleiro[TAM][TAM], int matriz[TAM_HABIL][TAM_HABIL], int origemLinha, int origemColuna) {
-    for (int i = 0; i < TAM_HABIL; i++) {
-        for (int j = 0; j < TAM_HABIL; j++) {
-            if (matriz[i][j] == 1) {
-                int l = origemLinha + (i - ORIGEM);
-                int c = origemColuna + (j - ORIGEM);
-                if (l >= 0 && l < TAM && c >= 0 && c < TAM && tabuleiro[l][c] == AGUA) {
-                    tabuleiro[l][c] = HABIL;
-                }
+    // Navio 3: Diagonal ↘ — (linha 0, coluna 0)
+    int linha_d1 = 0, coluna_d1 = 0;
+    if (linha_d1 + TAM_NAVIO <= TAM && coluna_d1 + TAM_NAVIO <= TAM) {
+        for (int i = 0; i < TAM_NAVIO; i++) {
+            if (tabuleiro_num[linha_d1 + i][coluna_d1 + i] == AGUA) {
+                tabuleiro_num[linha_d1 + i][coluna_d1 + i] = NAVIO;
             }
         }
     }
-}
 
-// Exibe o tabuleiro no console
-void exibirTabuleiro(int tabuleiro[TAM][TAM]) {
-    printf("\nLegenda: 0 = Agua | 3 = Navio | 5 = Habilidade\n\n");
+    // Navio 4: Diagonal ↙ — (linha 0, coluna 9)
+    int linha_d2 = 0, coluna_d2 = 9;
+    if (linha_d2 + TAM_NAVIO <= TAM && coluna_d2 - TAM_NAVIO + 1 >= 0) {
+        for (int i = 0; i < TAM_NAVIO; i++) {
+            if (tabuleiro_num[linha_d2 + i][coluna_d2 - i] == AGUA) {
+                tabuleiro_num[linha_d2 + i][coluna_d2 - i] = NAVIO;
+            }
+        }
+    }
+
+    // ============================
+    // 2. Matriz de exibição com char (0, 3, C, Z, T)
+    // ============================
+    char tabuleiro_exib[TAM][TAM];
     for (int i = 0; i < TAM; i++) {
         for (int j = 0; j < TAM; j++) {
-            printf("%d ", tabuleiro[i][j]);
+            if (tabuleiro_num[i][j] == AGUA)
+                tabuleiro_exib[i][j] = '0';
+            else if (tabuleiro_num[i][j] == NAVIO)
+                tabuleiro_exib[i][j] = '3';
+        }
+    }
+
+    // ============================
+    // 3. Habilidades Especiais (Cone, Cruz, Octaedro)
+    // ============================
+
+    // Cone: Posição inicial (linha 6, coluna 1)
+    int base_l = 6, base_c = 1;
+    char cone[3][5] = {
+        {'0', '0', 'C', '0', '0'},
+        {'0', 'C', 'C', 'C', '0'},
+        {'C', 'C', 'C', 'C', 'C'}
+    };
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 5; j++)
+            if (cone[i][j] != '0')
+                tabuleiro_exib[base_l + i][base_c + j] = cone[i][j];
+
+    // Cruz: Posição inicial (linha 1, coluna 4)
+    base_l = 1;
+    base_c = 4;
+    char cruz[3][5] = {
+        {'0', '0', 'Z', '0', '0'},
+        {'Z', 'Z', 'Z', 'Z', 'Z'},
+        {'0', '0', 'Z', '0', '0'}
+    };
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 5; j++)
+            if (cruz[i][j] != '0')
+                tabuleiro_exib[base_l + i][base_c + j] = cruz[i][j];
+
+    // Octaedro: Posição inicial (linha 5, coluna 2)
+    base_l = 5;
+    base_c = 5;
+    char octaedro[3][5] = {
+        {'0', '0', 'T', '0', '0'},
+        {'0', 'T', 'T', 'T', '0'},
+        {'0', '0', 'T', '0', '0'}
+    };
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 5; j++)
+            if (octaedro[i][j] != '0')
+                tabuleiro_exib[base_l + i][base_c + j] = octaedro[i][j];
+
+    // ============================
+    // 4. Impressão do tabuleiro final com legenda
+    // ============================
+    printf("\nTabuleiro Batalha Naval com Habilidades:\n");
+    printf("Legenda: 0 = Agua, 3 = Navio, C = Cone, Z = Cruz, T = Octaedro\n\n");
+
+    for (int linha = 0; linha < TAM; linha++) {
+        for (int coluna = 0; coluna < TAM; coluna++) {
+            printf("%c ", tabuleiro_exib[linha][coluna]);
         }
         printf("\n");
     }
-}
-
-int main() {
-    int tabuleiro[TAM][TAM];
-    int cone[TAM_HABIL][TAM_HABIL];
-    int cruz[TAM_HABIL][TAM_HABIL];
-    int octaedro[TAM_HABIL][TAM_HABIL];
-
-    // Etapa 1: Inicialização
-    inicializarTabuleiro(tabuleiro);
-    posicionarNavios(tabuleiro);
-
-    // Etapa 2: Geração das matrizes de habilidade
-    gerarMatrizCone(cone);
-    gerarMatrizCruz(cruz);
-    gerarMatrizOctaedro(octaedro);
-
-    // Etapa 3: Aplicação das habilidades na ordem correta
-    aplicarHabilidade(tabuleiro, octaedro, 7, 2);  // Octaedro em (7,2)
-    aplicarHabilidade(tabuleiro, cruz, 6, 6);      // Cruz em (6,6)
-    aplicarHabilidade(tabuleiro, cone, 3, 4);      // Cone em (3,4)
-
-    // Etapa 4: Exibir tabuleiro
-    exibirTabuleiro(tabuleiro);
 
     return 0;
 }
